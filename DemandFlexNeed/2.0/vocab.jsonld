@@ -1,0 +1,51 @@
+{
+  "@context": {
+    "@version": 1.1,
+    "beckn": "https://schema.nfh.global/core/v2.0/",
+    "oadr": "https://schema.nfh.global/openadr/v3.1.0/",
+    "deg": "https://schema.nfh.global/deg/DemandFlexNeed/v2.0/",
+    "schema": "https://schema.org/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@graph": [
+    {
+      "@id": "deg:DemandFlexNeed",
+      "@type": "rdfs:Class",
+      "rdfs:label": "Demand Flex Need",
+      "rdfs:comment": "Buyer-authored demand-flex procurement schedule — an OpenADR-aligned time series with one interval per tranche, columns locked to CAPACITY_REQUESTED, PRICE, and SHORTFALL_PENALTY. The PRICE sign carries reduce-vs-increase intent (negative = pay to consume)."
+    },
+    {
+      "@id": "deg:location",
+      "@type": "rdf:Property",
+      "rdfs:label": "Location",
+      "rdfs:comment": "Geographic area where flex is needed (Beckn Location — GeoJSON geometry + optional address).",
+      "rdfs:domain": "deg:DemandFlexNeed"
+    },
+    {
+      "@id": "deg:CapacityRequested",
+      "@type": "rdf:Property",
+      "rdfs:label": "Capacity requested",
+      "rdfs:comment": "Per-slot flex capacity the utility wants to procure (kW). Discovery/matching signal only — drifts as aggregators confirm; not resent at confirm nor used in settlement."
+    },
+    {
+      "@id": "deg:CapacityOffered",
+      "@type": "rdf:Property",
+      "rdfs:label": "Capacity offered",
+      "rdfs:comment": "Per-slot flex capacity the aggregator commits to deliver (kW). Inserted by the seller into the commitment series; settlement is bound by this."
+    },
+    {
+      "@id": "deg:Price",
+      "@type": "rdf:Property",
+      "rdfs:label": "Price",
+      "rdfs:comment": "Per-slot incentive (currency/kWh). A negative price pays for increased consumption; the sign is the reduce-vs-increase signal."
+    },
+    {
+      "@id": "deg:ShortfallPenalty",
+      "@type": "rdf:Property",
+      "rdfs:label": "Shortfall penalty",
+      "rdfs:comment": "Per-slot per-kWh charge applied to under-delivery against CAPACITY_OFFERED."
+    }
+  ]
+}

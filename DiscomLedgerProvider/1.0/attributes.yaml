@@ -1,0 +1,100 @@
+openapi: 3.1.1
+info:
+  title: DiscomLedgerProvider — Discom Ledger TSP Attributes (v1.0)
+  version: 1.0.0
+  description: >
+    Identity attributes for a regulated discom acting as a party in a P2P
+    trade. Attached to Contract.participants[*].participantAttributes (and to
+    the offer's participants[] at catalog publish) for entries whose role is
+    buyerDiscom or sellerDiscom.
+
+    The party's `id` is the discom's short code as defined in CEA's UPADHI
+    portal list of abbreviations (e.g. "PVVNL", "TPDDL", "BRPL") — a stable,
+    regulator-defined identifier. It is NOT repeated here. These attributes
+    carry the discom's beckn identity and endpoints:
+      - `discomId` — the discom node's beckn subscriber id, used for
+        routing and signing (and appearing as bppId/bapId when the discom is
+        the caller/receiver on a cascade leg);
+      - `discomUri` — the discom's own Beckn platform base URL (target for
+        init/cascade and unallocated-trade allocation);
+      - `ledgerId` / `ledgerUri` — the discom's ledger TSP (a distinct party)
+        and the endpoint where trade records are written after on_confirm.
+
+    UPADHI list of abbreviations:
+    https://upadhi.cea.gov.in/assets/documents/List%20of%20Abbreviations_10%20March'25_UPADHI.pdf
+
+    Two discoms MAY share a `ledgerUri`/`ledgerId` if they use the same TSP;
+    each platform still calls only its own side's discom (BAP -> buyerDiscom,
+    BPP -> sellerDiscom).
+
+components:
+  schemas:
+    DiscomLedgerProvider:
+      type: object
+      additionalProperties: false
+      required: [discomId, discomUri, ledgerId, ledgerUri]
+      x-tags:
+        - p2p-trading
+        - discom-ledger
+      x-jsonld:
+        "@context": ./context.jsonld
+        "@type": DiscomLedgerProvider
+      properties:
+
+        discomId:
+          type: string
+          description: >
+            The discom node's beckn subscriber id (its routing/signing identity
+            in the network registry). Distinct from the participant `id`, which
+            is the UPADHI short code. Appears as context.bppId / context.bapId
+            when the discom is the caller/receiver on a cascade leg.
+          example: "seller-discom.example.com"
+          x-jsonld:
+            "@id": discomId
+
+        discomUri:
+          type: string
+          format: uri
+          description: >
+            Base URL (scheme + host[:port], no path) of the discom's own Beckn
+            platform. Target for init/cascade routing and for requesting
+            allocation of unallocated trades to this discom. The platform
+            exposes the standard Beckn paths under this base:
+            `/bap/caller`, `/bap/receiver`, `/bpp/caller`, `/bpp/receiver`.
+          example: "https://ies-p2p-energy-discom.beckn.io"
+          x-jsonld:
+            "@id": discomUri
+
+        ledgerId:
+          type: string
+          description: >
+            Subscriber id (or did:web) of the discom's ledger TSP — a party
+            distinct from the discom itself. Used to tag and route ledger
+            records.
+          example: "ies-p2p-energy-ledger.beckn.io"
+          x-jsonld:
+            "@id": ledgerId
+
+        ledgerUri:
+          type: string
+          format: uri
+          description: >
+            Host base (scheme + host[:port], no path) of the discom ledger
+            TSP. The ledger acts as a Beckn node and exposes the standard
+            paths under this base:
+
+              `<ledgerUri>/bap/receiver/<action>`  — inbound endpoint where
+                  buyer/seller platforms cascade on_confirm and status to
+                  this ledger. The ledger is BAP-receiver on this leg.
+              `<ledgerUri>/bpp/caller/<action>`    — outbound endpoint from
+                  which the ledger initiates on_status callbacks back to
+                  buyer/seller platforms. The ledger is BPP-caller on that
+                  leg.
+              `<ledgerUri>/ledger/put`             — legacy_ledger mode PUT
+                  for non-beckn writes; kept for backward compatibility.
+
+            The path is appended by the caller per the action being
+            invoked; `ledgerUri` itself MUST NOT include a path component.
+          example: "https://ies-p2p-energy-ledger.beckn.io"
+          x-jsonld:
+            "@id": ledgerUri
