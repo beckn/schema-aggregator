@@ -1,0 +1,51 @@
+name: 1 Add source (manual trigger)
+run-name: "Propose source: ${{ inputs.schema_path }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      schema_path:
+        description: 'Schema Path (required): GitHub tree URL, e.g. https://github.com/<owner>/<repo>/tree/<ref>/<subpath>'
+        required: true
+        type: string
+      description:
+        description: 'Description (optional): human-readable summary of this source'
+        required: false
+        type: string
+      tags:
+        description: 'Tags (optional): comma-separated, e.g. "retail, mobility"'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Same reasoning as add-source-issue.yml's concurrency group: two runs for
+# the same schema_path would derive the same source_id and race pushing the
+# identical branch. Unlikely here (needs a genuine double-trigger, not two
+# events firing together the way issue forms do), but cheap insurance for
+# the same failure mode.
+concurrency:
+  group: add-source-dispatch-${{ inputs.schema_path }}
+  cancel-in-progress: true
+
+jobs:
+  propose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pyyaml
+
+      - name: Propose source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCHEMA_PATH: ${{ inputs.schema_path }}
+          DESCRIPTION: ${{ inputs.description }}
+          TAGS: ${{ inputs.tags }}
+        run: python3 .github/scripts/propose_source.py

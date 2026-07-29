@@ -1,0 +1,28 @@
+sources:
+  - id: beckn_schemas_main_schema
+    schemaPath: "https://github.com/beckn/schemas/tree/main/schema"
+    description: ""
+
+  - id: beckn_local-retail_main_schema
+    schemaPath: "https://github.com/beckn/local-retail/tree/main/schema"
+    description: ""
+
+  - id: beckn_deg_main_specification_schema
+    schemaPath: "https://github.com/beckn/DEG/tree/main/specification/schema"
+    description: "Schema to support digital energy grid. This also contains some schemas inspired from external standards (espiGreenButton, OpenADR etc.)."
+    tags: ["deg", "energy"]
+
+  - id: abhimail_beckn-schemas_main_transport-hiring
+    schemaPath: "https://github.com/abhimail/beckn-schemas/tree/main/transport-hiring"
+    description: "Extension of hiring schemas to support driver hiring in transport sector"
+    tags: ["transport-hiring"]
+
+  - id: abhimail_beckn-schemas_main_verification-service
+    schemaPath: "https://github.com/abhimail/beckn-schemas/tree/main/verification-service"
+    description: "This schema pack models a Verification Service Network on the Beckn Protocol v2.1 generalised core. It enables discovery, selection, and execution of identity, credential, and eligibility verification services across a decentralized network of verification providers."
+    tags: ["verification-service"]
+
+  - id: beckn_ddm_main_specification_schema
+    schemaPath: "https://github.com/beckn/DDM/tree/main/specification/schema"
+    description: "Decentralized Data Marketplace schema"
+    tags: ["data exchange", "data"]

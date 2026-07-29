@@ -1,0 +1,91 @@
+name: Add source (automatic, via Issue)
+
+on:
+  issues:
+    # 'labeled' covers the case where the add-source-request label didn't
+    # exist yet when an issue-form submission was created (GitHub Issue
+    # Forms only ever apply a label if it already exists in the repo --
+    # it never auto-creates a missing one, and silently drops the label
+    # from the issue if it's missing rather than erroring) -- adding the
+    # label after the fact will still pick it up here.
+    types: [opened, edited, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+# 'opened' and 'labeled' can both fire within milliseconds of each other for
+# the SAME issue (the form applies its label at creation time), causing two
+# runs to race pushing the same branch -- confirmed for real: both hit
+# `git push --force` on 'add-source-<id>' close enough together that git's
+# ref-locking rejected the loser with "cannot lock ref". Keying on the issue
+# number serializes any duplicate/overlapping events for one issue while
+# still letting different issues run fully in parallel.
+concurrency:
+  group: add-source-issue-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  propose:
+    if: contains(github.event.issue.labels.*.name, 'add-source-request')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - run: pip install pyyaml
+
+      - name: Parse the issue form
+        id: parsed
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: python3 .github/scripts/parse_issue_form.py
+
+      - name: Propose source
+        id: propose
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SCHEMA_PATH: ${{ steps.parsed.outputs.schema_path }}
+          DESCRIPTION: ${{ steps.parsed.outputs.description }}
+          TAGS: ${{ steps.parsed.outputs.tags }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python3 .github/scripts/propose_source.py
+
+      # The template's title ("Add source: ") is only a pre-filled prefix, and
+      # the id itself isn't known until propose_source.py derives it from
+      # schema_path -- so this can only run after the propose step, using its
+      # derived_id output rather than a human-entered field.
+      - name: Set issue title from the derived source_id
+        if: steps.propose.outputs.derived_id != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          SOURCE_ID: ${{ steps.propose.outputs.derived_id }}
+        run: |
+          gh issue edit "$ISSUE_NUMBER" --title "Add source: $SOURCE_ID"
+
+      # There's no run log for the person who filed the issue to check --
+      # the issue thread is their only interface, so both success and
+      # failure get reported there directly.
+      - name: Comment result on the issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          OUTCOME: ${{ steps.propose.outcome }}
+          PR_URL: ${{ steps.propose.outputs.pr_url }}
+          ERROR: ${{ steps.propose.outputs.error }}
+        run: |
+          if [ "$OUTCOME" = "success" ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "Opened $PR_URL -- a validation check will comment there shortly with what would actually publish."
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "Couldn't open a PR yet: $ERROR. Edit this issue with corrected details and it'll retry automatically."
+          fi
+
+      - name: Fail the run if the proposal failed
+        if: steps.propose.outcome != 'success'
+        run: exit 1
