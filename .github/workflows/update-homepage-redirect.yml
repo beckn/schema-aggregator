@@ -1,0 +1,41 @@
+name: 4 Update homepage redirect (manual trigger)
+run-name: "Update homepage redirect by ${{ github.actor }}"
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-homepage-redirect
+  cancel-in-progress: false
+
+jobs:
+  update-redirect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout aggregator repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate root redirect page
+        env:
+          SCHEMA_BROWSER_URL: ${{ vars.SCHEMA_BROWSER_URL }}
+        run: python3 .github/scripts/generate_redirect.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update homepage redirect"
+            git push
+          fi
