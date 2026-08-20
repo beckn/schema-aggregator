@@ -8,8 +8,9 @@ Reads sources.yaml, and for each matching source:
     "Cross-source collisions" below), reporting it as an issue
   - validates each remaining class/version found (schema_validator.validate_class_dir)
   - copies only versions that pass validation into the repo root, flattened
-    (no per-source subfolder), with the leading "v" stripped from the
-    destination version-directory name (source's "v2.0" -> our "2.0")
+    (no per-source subfolder), keeping the source's version-directory name
+    as-is, "v" prefix and all (source's "v2.0" -> our "v2.0"), so the
+    published URL matches the version string used elsewhere (e.g. $id/x-iri)
   - detects classes that no longer exist upstream (via a per-source manifest
     committed at .sync/manifest-<source_id>.json) and removes them
 
@@ -354,14 +355,15 @@ def sync_one(source, ordered_source_ids):
                 shutil.copy2(readme_src, os.path.join(class_dest, "README.md"))
 
             for version_name in valid_versions:
-                normalized = normalize_version(version_name)
-                dest_version_path = os.path.join(class_dest, normalized)
+                dest_version_path = os.path.join(class_dest, version_name)
 
-                # migration: drop an old v-prefixed sibling left over from before normalization
-                if version_name != normalized:
-                    old_prefixed_path = os.path.join(class_dest, version_name)
-                    if os.path.isdir(old_prefixed_path):
-                        shutil.rmtree(old_prefixed_path)
+                # migration: drop an old stripped-prefix sibling left over from
+                # when we used to publish without the "v" (e.g. "2.0" -> "v2.0")
+                stripped = normalize_version(version_name)
+                if stripped != version_name:
+                    old_stripped_path = os.path.join(class_dest, stripped)
+                    if os.path.isdir(old_stripped_path):
+                        shutil.rmtree(old_stripped_path)
 
                 if os.path.exists(dest_version_path):
                     shutil.rmtree(dest_version_path)
