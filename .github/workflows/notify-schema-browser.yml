@@ -1,0 +1,28 @@
+name: Notify schema-browser (automatic)
+
+# Catches content changes that land on main via a normal push (e.g. merging
+# one of the "propose source/removal" PRs, or a direct human push). Pushes
+# made by GITHUB_TOKEN from inside sync.yml / sources-changed.yml do NOT
+# trigger this workflow -- GitHub suppresses on:push runs for GITHUB_TOKEN
+# pushes to prevent recursive triggers -- so those two workflows carry their
+# own copy of the notify step instead.
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: notify-schema-browser
+  cancel-in-progress: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger schema-browser rebuild
+        env:
+          GH_TOKEN: ${{ secrets.SCHEMA_BROWSER_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/beckn/schema-browser/dispatches \
+            -f event_type=schema-aggregator-updated \
+            -F "client_payload[sha]=${{ github.sha }}"

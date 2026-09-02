@@ -48,16 +48,28 @@ jobs:
         run: python3 .github/scripts/sync_sources.py
 
       - name: Commit and push if changed
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "No changes to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "sync: pull schema content (source_id=${{ github.event.inputs.source_id || 'all' }})"
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Trigger schema-browser rebuild
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SCHEMA_BROWSER_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/beckn/schema-browser/dispatches \
+            -f event_type=schema-aggregator-updated \
+            -F "client_payload[sha]=${{ github.sha }}"
 
       - name: Update validation tracking issue
         env:
