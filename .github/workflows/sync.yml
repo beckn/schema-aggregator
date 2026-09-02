@@ -15,6 +15,10 @@ on:
           exact id of one specific source to sync just that one.
         type: string
         default: 'all'
+  schedule:
+    # 'inputs' isn't populated for a schedule event, so SOURCE_ID below
+    # falls through to 'all' -- same as a manual run with the default.
+    - cron: '0 3 * * *'
 
 permissions:
   contents: write
@@ -57,13 +61,14 @@ jobs:
             echo "No changes to commit."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
+            echo "meaningful=$(bash .github/scripts/has_meaningful_change.sh)" >> "$GITHUB_OUTPUT"
             git commit -m "sync: pull schema content (source_id=${{ github.event.inputs.source_id || 'all' }})"
             git push
             echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Trigger schema-browser rebuild
-        if: steps.commit.outputs.pushed == 'true'
+        if: steps.commit.outputs.pushed == 'true' && steps.commit.outputs.meaningful == 'true'
         env:
           GH_TOKEN: ${{ secrets.SCHEMA_BROWSER_DISPATCH_TOKEN }}
         run: |
