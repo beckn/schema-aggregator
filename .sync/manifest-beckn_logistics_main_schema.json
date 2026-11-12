@@ -1,0 +1,31 @@
+{
+  "schemas": [
+    "Carrier",
+    "Consignment",
+    "Contact",
+    "Courier",
+    "DeliverySlot",
+    "Hub",
+    "Logistics",
+    "LogisticsAlert",
+    "LogisticsCancellationPolicy",
+    "LogisticsDriver",
+    "LogisticsFare",
+    "LogisticsFareBreakup",
+    "LogisticsFeedback",
+    "LogisticsOperator",
+    "LogisticsPlace",
+    "LogisticsRating",
+    "LogisticsReceipt",
+    "LogisticsRoute",
+    "LogisticsSupportCase",
+    "LogisticsVehicle",
+    "Package",
+    "Proof",
+    "ReturnPolicy",
+    "Shipment",
+    "TrackingUpdate",
+    "Waypoint"
+  ],
+  "last_synced": "2026-11-12T15:44:51.286662+00:00"
+}

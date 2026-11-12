@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Feedback",
+  "title": "LogisticsFeedback",
   "description": "Qualitative feedback from sender or receiver about a logistics experience.",
   "properties": {
     "id": {
@@ -11,7 +11,7 @@
       "type": "string"
     },
     "rating": {
-      "$ref": "https://schema.nfh.global/Rating/v2.1/schema.json"
+      "$ref": "https://schema.nfh.global/LogisticsRating/v2.0/schema.json"
     },
     "review": {
       "type": "string",

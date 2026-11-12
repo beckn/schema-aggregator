@@ -7,7 +7,7 @@ A Hub is a logistics fulfillment center, sorting facility, or distribution point
 | File | Purpose |
 |---|---|
 | [https://schema.nfh.global/Hub/v2.0/attributes.yaml](https://schema.nfh.global/Hub/v2.0/attributes.yaml) | OpenAPI schema envelope (versioned path) |
-| [https://schema.nfh.global/Hub/v2.0/attributes.jsonschema.yaml](https://schema.nfh.global/Hub/v2.0/attributes.jsonschema.yaml) | JSON Schema document (versioned path) |
+| [https://schema.nfh.global/Hub/v2.0/schema.json](https://schema.nfh.global/Hub/v2.0/schema.json) | JSON Schema document (versioned path) |
 | [https://schema.nfh.global/Hub/v2.0/context.jsonld](https://schema.nfh.global/Hub/v2.0/context.jsonld) | JSON-LD context (versioned path) |
 | [https://schema.nfh.global/Hub/v2.0/vocab.jsonld](https://schema.nfh.global/Hub/v2.0/vocab.jsonld) | RDF vocabulary (versioned path) |
 
@@ -18,9 +18,9 @@ A Hub is a logistics fulfillment center, sorting facility, or distribution point
 | `id` | yes | string | - |
 | `name` | yes | string | - |
 | `code` | no | string | Short hub code |
-| `place` | yes | $ref: https://schema.nfh.global/Place/v2.0/attributes.yaml#/components/schemas/Place | - |
+| `place` | yes | $ref: https://schema.nfh.global/LogisticsPlace/v2.0/attributes.yaml#/components/schemas/LogisticsPlace | - |
 | `type` | no | string | - |
-| `operator` | no | $ref: https://schema.nfh.global/Operator/v2.0/attributes.yaml#/components/schemas/Operator | - |
+| `operator` | no | $ref: https://schema.nfh.global/LogisticsOperator/v2.0/attributes.yaml#/components/schemas/LogisticsOperator | - |
 | `operatingHours` | no | object | - |
 | `processingCapacity` | no | object | Maximum packages processed per day |
 | `serviceablePincodes` | no | array | PIN codes serviced from this hub |

@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Receipt",
+  "title": "LogisticsReceipt",
   "description": "Digital acknowledgment of payment and delivery for a logistics service.",
   "required": [
     "id",
@@ -25,7 +25,7 @@
       "format": "date-time"
     },
     "fare": {
-      "$ref": "https://schema.nfh.global/Fare/v2.0/schema.json"
+      "$ref": "https://schema.nfh.global/LogisticsFare/v2.0/schema.json"
     },
     "paymentMode": {
       "type": "string",
