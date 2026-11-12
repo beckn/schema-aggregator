@@ -1,12 +1,12 @@
 sources:
+  - id: beckn_schemas_main_schema
+    schemaPath: "https://github.com/beckn/schemas/tree/main/schema"
+    description: ""
+
   - id: beckn_logistics_main_schema
     schemaPath: "https://github.com/beckn/logistics/tree/main/schema"
     description: "Logistics domain schema packs"
     tags: ["logistics"]
-
-  - id: beckn_schemas_main_schema
-    schemaPath: "https://github.com/beckn/schemas/tree/main/schema"
-    description: ""
 
   - id: beckn_local-retail_main_schema
     schemaPath: "https://github.com/beckn/local-retail/tree/main/schema"
